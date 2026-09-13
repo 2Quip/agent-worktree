@@ -51,6 +51,18 @@ Two properties make this worth a mechanism rather than discipline:
 
 Before we had the tool, simply *asking* — "I'm merging, hold off six minutes" — went five for five in one evening, each after multiple failed attempts.
 
+### 4. A prompt is a hang, when nobody is at the keyboard
+
+A schema tool in our pipeline asks an interactive question in one specific case — whether two column changes are really a rename. It has no non-interactive flag, doesn't take an answer on stdin, and can't be driven through a pty. For a person that is a two-second keystroke. For an unattended agent it is **a hang with no error**: the process simply stops, holding whatever it was holding, reporting nothing, until something else times out or a human wanders past.
+
+This is worth separating from the other failures here because it is not a collision at all — one agent alone hits it. But it belongs on the same list, because *the consequences are multiplied by running unattended*, and because the fix is the same shape as `merge wait`:
+
+> **The hang is not the problem. The absence of any signal that you are waiting is the problem.**
+
+That reframing is the useful part, and it generalises well past schema tools. Anything an agent shells out to can block forever; what makes it survivable is emitting *something* — a position, an elapsed time, a reason — on a regular tick. Which is exactly why `merge wait` prints its position rather than sitting silent, and why a guard that cannot evaluate its subject should say so loudly rather than stall.
+
+**When you write a tool agents will call, assume nobody is watching it.** A prompt, a confirmation, a "press any key" is a deadlock in that world. If you must ask something, fail with the question in the error text instead.
+
 Be precise about what that evidence shows, though, because it is easy to overclaim. Those were **negotiations, not rankings**: someone explained why their change should go first and someone else agreed to wait. What it demonstrates is that the judgement was consistent and that yielding worked — not that a rule was being applied mechanically. The queue automates a judgement humans were making by talking, which is why claims carry a note, why `status` shows it, and why `--force` always wins.
 
 ---
