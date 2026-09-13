@@ -1,0 +1,11 @@
+{
+  "services": { "api": 3001, "web": 5174, "admin": 5175 },
+  "reserved": { "postgres": 5433, "redis": 6381 },
+  "stride": 6,
+  "spread": 40,
+  "staleMinutes": 15,
+  "env": {
+    "VITE_API_URL": "http://localhost:${port:api}",
+    "DATABASE_URL": "postgres://localhost:${port:postgres}/app"
+  }
+}

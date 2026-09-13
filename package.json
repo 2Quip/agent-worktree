@@ -1,0 +1,41 @@
+{
+  "name": "agent-worktree",
+  "version": "0.1.0",
+  "description": "Coordination primitives for running several coding agents on one repository: per-worktree ports, deterministic slots, and a merge slot so one agent merges at a time.",
+  "type": "module",
+  "license": "MIT",
+  "bin": {
+    "agent-worktree": "bin/agent-worktree.mjs"
+  },
+  "exports": {
+    ".": "./src/index.mjs",
+    "./merge-slot": "./src/merge-slot.mjs",
+    "./ports": "./src/ports.mjs",
+    "./worktree-slot": "./src/worktree-slot.mjs"
+  },
+  "files": [
+    "bin",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mjs"
+  },
+  "keywords": [
+    "claude-code",
+    "ai-agents",
+    "git-worktree",
+    "monorepo",
+    "merge-queue",
+    "dev-ports"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/2Quip/agent-worktree.git"
+  },
+  "author": "2QuipAI"
+}
