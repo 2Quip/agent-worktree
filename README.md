@@ -147,6 +147,8 @@ Wrap it around whatever you already use to merge. The slot is a JSON file in `$H
 
 **It degrades rather than stopping the line.** A slot auto-expires after `staleMinutes` (default 15), because an agent that crashed mid-merge must not wedge everyone until a human notices — and a stale steal announces itself loudly rather than silently. An unreadable slot file **warns and proceeds**: failing to coordinate costs a rebase, while failing to merge costs the work.
 
+**A guard that is quietly wrong gets ignored; one that is loudly wrong gets obeyed.** Worth holding onto when you write the confident refusals a tool like this is made of. We had a checker report *"215 migrations have no row and can never apply here"* — categorical, specific, and wrong, because it compared a live database against a stale working tree. Its author acted on it and nearly blocked a colleague's correct repair. The underlying mistake was ordinary, reading the wrong index; what made it expensive was the register it spoke in. **Every message here that refuses something is also an instruction someone will follow, so say what was actually checked, and be loudest about what you could not see.**
+
 **Identity is by task id first, name second.** One change has one author working it, so a slot recording the id you're acting on is yours by construction. This matters because names aren't stable — see below.
 
 ---
