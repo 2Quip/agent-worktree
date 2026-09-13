@@ -38,7 +38,9 @@ The first version of that port allocator used a stride of 10. With our base port
 
 With seven agents and a five-minute CI, **"not behind the base branch AND green" is only satisfiable in the gaps between other merges.** You push, CI runs, someone lands during it, and your green result no longer proves anything about the branch you're merging into. Rebase, repeat.
 
-Four agents burned three to four cycles each in one evening. **None of them resolved a real conflict** — the commits touched different files entirely.
+Four agents burned three to four cycles each in one evening. **Most resolved no real conflict** — the commits touched different files entirely.
+
+The exception is the one that proves the cost. Two migrations rebasing past each other conflict in the journal, in the lane file, and — invisibly — in the schema snapshot chain, where a *green* rebase can still leave two snapshots claiming the same parent. No conflict marker, no failing test, and the rebase does not fix it. So: rebasing behind another agent is usually pure waste, and occasionally the only thing standing between you and a corrupted schema history. **Do the post-rebase check anyway.**
 
 Two properties make this worth a mechanism rather than discipline:
 
@@ -47,7 +49,9 @@ Two properties make this worth a mechanism rather than discipline:
 
 > **`agent-worktree merge take <id>`** — one agent merges at a time. Take it **before the CI run you don't want to lose**, not before the merge. That's where the race is actually lost.
 
-Before we had the tool, simply *asking* — "I'm merging, hold off six minutes" — went five for five in one evening, each after multiple failed attempts. The tool makes that a command instead of a message someone has to remember to send.
+Before we had the tool, simply *asking* — "I'm merging, hold off six minutes" — went five for five in one evening, each after multiple failed attempts.
+
+Be precise about what that evidence shows, though, because it is easy to overclaim. Those were **negotiations, not rankings**: someone explained why their change should go first and someone else agreed to wait. What it demonstrates is that the judgement was consistent and that yielding worked — not that a rule was being applied mechanically. The queue automates a judgement humans were making by talking, which is why claims carry a note, why `status` shows it, and why `--force` always wins.
 
 ---
 
@@ -56,6 +60,10 @@ Before we had the tool, simply *asking* — "I'm merging, hold off six minutes" 
 **It coordinates agents that share a filesystem. It cannot see anyone pushing from another machine.**
 
 That's usually the right trade: co-located agents collide many times an hour, humans on their own machines rarely do. If you need cross-machine serialisation you need a real merge queue — GitHub's, Mergify, Graphite, Trunk. Note that GitHub's own merge queue requires Enterprise Cloud for *private* repositories, which is what pushed us to build this instead.
+
+**The cheapest partial answer, which needs no tooling at all: push your branch at the first commit, not when the work is finished.** A pushed branch is visible to everyone via `git ls-remote --heads origin` whether or not a pull request exists; unpushed work is invisible to every check anyone can run, on any machine. It also buys you *review* before you land rather than merely avoiding a collision.
+
+It does **not** close the gap — a branch pushed after someone looks is still invisible, and this tool still cannot see another machine's merge. Treat it as narrowing the window, not shutting it.
 
 **It is not a safety mechanism.** Holding the merge slot says nothing about whether your change is correct, your CI actually ran, or a deploy is in flight. Keep your own pre-merge checks. This only decides who goes first.
 
